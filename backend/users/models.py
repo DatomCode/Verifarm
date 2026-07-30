@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from backend.verifarm import settings
+
 # Create your models here.
 
 
@@ -23,3 +25,14 @@ class CustomUser(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
 
     pass
+
+class FarmerProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='farmer_profile')
+    farm_name = models.CharField(max_length=255)
+    farm_location = models.CharField(max_length=255, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # Add any other fields specific to farmers
+
+    def __str__(self):
+        return self.farm_name
