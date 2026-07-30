@@ -57,7 +57,7 @@ class BuyerProfile(models.Model):
         return f"{self.company_name}"
 
 class InspectorProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='buyer_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='inspector_profile')
     is_available = models.BooleanField(default=True)
     region = models.CharField(max_length=255, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
