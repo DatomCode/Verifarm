@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import FarmerProfile, BuyerProfile
+from .models import FarmerProfile, BuyerProfile, InspectorProfile
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -29,6 +29,7 @@ class FarmerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = FarmerProfile
         fields = ['id', 'user', 'farm_name', 'farm_location', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
 
     def validate(self, attrs):
         request = self.context.get("request")
@@ -64,8 +65,8 @@ class FarmerProfileSerializer(serializers.ModelSerializer):
 class BuyerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = BuyerProfile
-        fields = ['id', 'user', 'company_name', 'company_location', 'created_at', 'updated_at']
-        read_only_fields = ['plan_tier']
+        fields = ['id', 'user', 'company_name', 'company_location', 'created_at', 'updated_at', 'plan_tier']
+        read_only_fields = ['plan_tier','user', 'created_at', 'updated_at']
     def validate(self, attrs):
         request =self.context.get("request")
         if request.user.role != "buyer":
@@ -89,6 +90,38 @@ class BuyerProfileSerializer(serializers.ModelSerializer):
         request = self.context["request"]
 
         return BuyerProfile.objects.create(
+            user=request.user,
+            **validated_data
+        )
+        
+class InspectorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InspectorProfile
+        fields = ['id', 'user', 'region', 'is_available', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'created_at', 'updated_at']
+    def validate(self, attrs):
+        request =self.context.get("request")
+        if request.user.role != "inspector":
+            raise serializers.ValidationError(
+                {"error": "Only users with the 'inspector' role can perform this action."}
+            )
+        has_profile = hasattr(request.user, "inspector_profile") 
+        if self.instance is None and has_profile:
+            raise serializers.ValidationError(
+                {"error": "You already have a inspector profile."}
+            )
+
+        if self.instance is not None and not has_profile:
+            raise serializers.ValidationError(
+                {"error": "Profile does not exist to update."}
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        return InspectorProfile.objects.create(
             user=request.user,
             **validated_data
         )

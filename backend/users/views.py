@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .models import FarmerProfile, BuyerProfile
-from .serializers import CustomUserSerializer, FarmerProfileSerializer, BuyerProfileSerializer
+from .models import FarmerProfile, BuyerProfile, InspectorProfile
+from .serializers import CustomUserSerializer, FarmerProfileSerializer, BuyerProfileSerializer, InspectorProfileSerializer
 # Create your views here.
 
 # Register User API View
@@ -117,3 +117,49 @@ class BuyerProfileView(APIView):
             
         except BuyerProfile.DoesNotExist:
             return Response({"error": "Buyer profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        
+class InspectorProfileView(APIView):
+    permission_classes = [IsAuthenticated]  # Allow only authenticated users to access this view
+
+    # Helper method to get the Inspector profile for the authenticated user
+    def get_object(self):
+        return self.request.user.Inspector_profile  
+    
+    # create inspector profile
+    def post(self, request):
+        serializer = InspectorProfileSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()  
+            return Response({
+                "message": "Inspector profile successfully created!",
+                "profile": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # get inspector profile
+    def get(self, request):
+        try:
+            profile = self.get_object()
+            serializer = InspectorProfileSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        except InspectorProfile.DoesNotExist:
+            return Response({"error": "Inspector profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    # update inspector profile
+    def patch(self, request):
+        try:
+            profile = self.get_object() # get the inspector profile for the authenticated user
+            serializer = InspectorProfileSerializer(profile, data=request.data, context={"request": request}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    "message": "Inspector profile successfully updated!",
+                    "profile": serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except InspectorProfile.DoesNotExist:
+            return Response({"error": "Inspector profile not found."}, status=status.HTTP_404_NOT_FOUND)
