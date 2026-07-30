@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import FarmerProfile
+from .models import FarmerProfile, BuyerProfile
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -59,5 +59,37 @@ class FarmerProfileSerializer(serializers.ModelSerializer):
             user=request.user,
             **validated_data
         )
-                
+
+
+class BuyerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BuyerProfile
+        fields = ['id', 'user', 'company_name', 'company_location', 'created_at', 'updated_at']
+        read_only_fields = ['plan_tier']
+    def validate(self, attrs):
+        request =self.context.get("request")
+        if request.user.role != "buyer":
+            raise serializers.ValidationError(
+                {"error": "Only users with the 'buyer' role can perform this action."}
+            )
+        has_profile = hasattr(request.user, "buyer_profile") 
+        if self.instance is None and has_profile:
+            raise serializers.ValidationError(
+                {"error": "You already have a buyer profile."}
+            )
+
+        if self.instance is not None and not has_profile:
+            raise serializers.ValidationError(
+                {"error": "Profile does not exist to update."}
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        request = self.context["request"]
+
+        return BuyerProfile.objects.create(
+            user=request.user,
+            **validated_data
+        )
         

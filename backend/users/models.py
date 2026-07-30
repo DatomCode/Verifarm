@@ -54,4 +54,4 @@ class BuyerProfile(models.Model):
     # Add any other fields specific to buyers
 
     def __str__(self):
-        return self.company_name
+        return f"{self.company_name}"
