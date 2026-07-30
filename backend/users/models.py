@@ -36,3 +36,22 @@ class FarmerProfile(models.Model):
 
     def __str__(self):
         return self.farm_name
+
+class BuyerProfile(models.Model):
+
+    TIER_CHOICES = (
+        ('free', 'Free'),
+        ('pro', 'Pro'),
+        ('enterprise', 'Enterprise'),
+    )
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='buyer_profile')
+    company_name = models.CharField(max_length=255)
+    company_location = models.CharField(max_length=255, db_index=True)
+    plan_tier = models.CharField(max_length=50, choices=TIER_CHOICES, default='free')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # Add any other fields specific to buyers
+
+    def __str__(self):
+        return self.company_name
