@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from backend.verifarm import settings
+from verifarm import settings
 
 # Create your models here.
 
