@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Optional
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from apps.users.models import FarmerProfile
+from users.models import FarmerProfile
 from .models import ProduceBatch
 
 
@@ -13,11 +13,7 @@ ALLOWED_STATUS_TRANSITIONS = {
     'rejected': [],  # End state
 }
 
-
-# ==========================================
 # READ / QUERY SERVICES
-# ==========================================
-
 def get_pending_inspection_queue(commodity_type: Optional[str] = None):
     """
     Fetches pending batches for inspectors.
@@ -28,7 +24,6 @@ def get_pending_inspection_queue(commodity_type: Optional[str] = None):
         queryset = queryset.filter(commodity_type__iexact=commodity_type)
     return queryset.order_by('created_at')
 
-
 def get_farmer_batches(farmer_profile: FarmerProfile):
     """
     Fetches all produce batches owned by a given farmer.
@@ -36,10 +31,7 @@ def get_farmer_batches(farmer_profile: FarmerProfile):
     return ProduceBatch.objects.filter(farmer_profile=farmer_profile)
 
 
-# ==========================================
 # WRITE / MUTATION SERVICES
-# ==========================================
-
 @transaction.atomic
 def create_produce_batch(
     farmer_profile: FarmerProfile,
