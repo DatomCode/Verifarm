@@ -1,5 +1,5 @@
 from django.db import models
-from apps.users.models import FarmerProfile  # Adjust path to your user app
+from users.models import FarmerProfile  
 
 
 class ProduceBatch(models.Model):
