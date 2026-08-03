@@ -3,14 +3,12 @@ from users.models import FarmerProfile
 
 
 class ProduceBatch(models.Model):
-    # Standard choice tuple instead of set {} to avoid migration bugs
     STATUS_CHOICES = (
         ('pending', 'pending'),
         ('verified', 'verified'),
         ('rejected', 'rejected'),
     )
 
-    # Django automatically names the DB column 'farmer_profile_id'
     farmer_profile = models.ForeignKey(
         FarmerProfile, 
         on_delete=models.PROTECT, 
